@@ -35,33 +35,24 @@ class AppContext:
             logging.config.dictConfig(json.load(f))
 
         svc_katalogus = services.Katalogus(
-            host=self.config.host_katalogus,
             source=f"scheduler/{scheduler.__version__}",
         )
 
         svc_bytes = services.Bytes(
-            host=self.config.host_bytes,
-            user=self.config.host_bytes_user,
-            password=self.config.host_bytes_password,
             source=f"scheduler/{scheduler.__version__}",
         )
 
         svc_octopoes = services.Octopoes(
-            host=self.config.host_octopoes,
             source=f"scheduler/{scheduler.__version__}",
             orgs=svc_katalogus.get_organisations(),
         )
 
-        lst_scan_profile = listeners.ScanProfile(
-            dsn=self.config.host_scan_profile,
-        )
+        lst_scan_profile = listeners.ScanProfile()
 
         lst_raw_data = listeners.RawData(
-            dsn=self.config.host_raw_data,
         )
 
         lst_normalizer_meta = listeners.NormalizerMeta(
-            dsn=self.config.host_normalizer_meta,
         )
 
         # Register external services, SimpleNamespace allows us to use dot

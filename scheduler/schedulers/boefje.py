@@ -4,7 +4,6 @@ from types import SimpleNamespace
 from typing import List
 
 import mmh3
-import pika
 import requests
 
 from scheduler import context, queues, rankers
@@ -54,27 +53,9 @@ class BoefjeScheduler(Scheduler):
         while not self.queue.full():
             time.sleep(1)
 
-            try:
-                latest_ooi = self.ctx.services.scan_profile.get_latest_object(
-                    queue=f"{self.organisation.id}__scan_profile_increments",
-                )
-            except (
-                pika.exceptions.ConnectionClosed,
-                pika.exceptions.ChannelClosed,
-                pika.exceptions.ChannelClosedByBroker,
-                pika.exceptions.AMQPConnectionError,
-            ) as e:
-                self.logger.warning(
-                    "Could not connect to rabbitmq queue: %s [org_id=%s, scheduler_id=%s]",
-                    f"{self.organisation.id}__scan_profile_increments",
-                    self.organisation.id,
-                    self.scheduler_id,
-                )
-                if self.stop_event.is_set():
-                    raise e
-
-                time.sleep(60)
-                return
+            latest_ooi = self.ctx.services.scan_profile.get_latest_object(
+                queue=f"{self.organisation.id}__scan_profile_increments",
+            )
 
             if latest_ooi is None:
                 self.logger.debug(

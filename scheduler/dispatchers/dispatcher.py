@@ -1,7 +1,6 @@
 import logging
 from typing import Any, Type
 
-import celery
 import pydantic
 import scheduler as sdl
 from scheduler import context, queues, schedulers
@@ -120,6 +119,9 @@ class Dispatcher:
         self.dispatch(p_item=p_item)
 
 
+TASKS = {}
+
+
 class CeleryDispatcher(Dispatcher):
     """A Celery implementation of a Dispatcher.
 
@@ -158,6 +160,64 @@ class CeleryDispatcher(Dispatcher):
                 A string describing the name of the Celery task
         """
         super().__init__(scheduler=scheduler, item_type=item_type)
+
+        self.ctx = ctx
+        self.celery_queue = celery_queue
+        self.task_name = task_name
+
+        if celery_queue not in TASKS:
+            TASKS[self.celery_queue] = {}
+
+        if self.task_name not in TASKS[self.celery_queue]:
+            TASKS[self.celery_queue][self.task_name] = []
+
+    def dispatch(self, p_item: queues.PrioritizedItem) -> None:
+        super().dispatch(p_item=p_item)
+
+        item_dict = p_item.item.dict()
+
+        TASKS[self.celery_queue][self.task_name].append(item_dict)
+
+
+class CeleryDispatcherV1(Dispatcher):
+    """A Celery implementation of a Dispatcher.
+
+    Attributes:
+        ctx:
+            A context.AppContext instance.
+        celery_queue:
+            A string descibing the Celery queue to which the tasks need to
+            be dispatched.
+        task_name:
+            A string describing the name of the Celery task
+    """
+
+    def __init__(
+        self,
+        ctx: context.AppContext,
+        scheduler: schedulers.Scheduler,
+        item_type: Type[pydantic.BaseModel],
+        celery_queue: str,
+        task_name: str,
+    ):
+        """Initialize the CeleryDispatcher class.
+
+        Args:
+            ctx:
+                A contex.AppContext instance.
+            pq:
+                A queue.PriorityQueue instance.
+            item_type:
+                A pydantic.BaseModel object that specifies the type of item
+                that should be dispatched, this helps with validation.
+            celery_queue:
+                A string descibing the Celery queue to which the tasks need to
+                be dispatched.
+            task_name:
+                A string describing the name of the Celery task
+        """
+        super().__init__(scheduler=scheduler, item_type=item_type)
+        import celery
 
         self.ctx = ctx
         self.celery_queue = celery_queue

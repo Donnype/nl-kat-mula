@@ -3,7 +3,6 @@ import logging
 import urllib.parse
 from typing import Dict, Optional
 
-import pika
 
 from ..connector import Connector
 
@@ -28,6 +27,9 @@ class Listener(Connector):
         raise NotImplementedError
 
 
+QUEUES = {}
+
+
 class RabbitMQ(Listener):
     """A RabbitMQ Listener implementation that allows subclassing of specific
     RabbitMQ channel listeners. You can subclass this class and set the
@@ -40,7 +42,44 @@ class RabbitMQ(Listener):
             connect to.
     """
 
+    def __init__(self):
+        """Initialize the RabbitMQ Listener
+
+        Args:
+            dsn:
+                A string defining the data source name of the RabbitMQ host to
+                connect to.
+        """
+        super().__init__()
+
+    def get(self, queue: str) -> Optional[Dict[str, object]]:
+        if not queue in QUEUES:
+            return None
+
+        if not QUEUES[queue]:
+            return None
+
+        return QUEUES[queue].pop(0)
+
+    def is_healthy(self) -> bool:
+        return True
+
+
+class RabbitMQV1(Listener):
+    """A RabbitMQ Listener implementation that allows subclassing of specific
+    RabbitMQ channel listeners. You can subclass this class and set the
+    channel and procedure that needs to be dispatched when receiving messages
+    from a RabbitMQ queue.
+
+    Attibutes:
+        dsn:
+            A string defining the data source name of the RabbitMQ host to
+            connect to.
+    """
+
     def __init__(self, dsn: str):
+        import pika
+
         """Initialize the RabbitMQ Listener
 
         Args:
@@ -76,9 +115,9 @@ class RabbitMQ(Listener):
 
     def callback(
         self,
-        channel: pika.channel.Channel,
-        method: pika.spec.Basic.Deliver,
-        properties: pika.spec.BasicProperties,
+        channel,
+        method,
+        properties,
         body: bytes,
     ) -> None:
         self.logger.debug(" [x] Received %r", body)

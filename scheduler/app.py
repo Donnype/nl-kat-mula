@@ -4,7 +4,7 @@ import threading
 import time
 from typing import Any, Callable, Dict
 
-from scheduler import context, dispatchers, queues, rankers, schedulers, server
+from scheduler import context, dispatchers, queues, rankers, schedulers
 from scheduler.connectors import listeners
 from scheduler.models import BoefjeTask, NormalizerTask, Organisation
 from scheduler.utils import thread
@@ -58,9 +58,6 @@ class App:
 
         # Initialize listeners
         self.listeners: Dict[str, listeners.Listener] = {}
-
-        # Initialize API server
-        self.server: server.Server = server.Server(self.ctx, self.schedulers)
 
     def shutdown(self) -> None:
         """Gracefully shutdown the scheduler, and all threads."""
@@ -233,9 +230,6 @@ class App:
             * dispatchers
             * monitors
         """
-        # API Server
-        self._run_in_thread(name="server", func=self.server.run, daemon=False)
-
         # Start the listeners
         for name, listener in self.listeners.items():
             self._run_in_thread(name=f"listener_{name}", func=listener.listen)

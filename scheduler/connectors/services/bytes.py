@@ -4,9 +4,40 @@ from scheduler.connectors.errors import exception_handler
 from scheduler.models import BoefjeMeta
 
 from .services import HTTPService
+from boefjes.bytes_client import BOEFJE_METAS
 
 
-class Bytes(HTTPService):
+class Bytes:
+    name = "bytes"
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def get_last_run_boefje(self, boefje_id: str, input_ooi: str, organization_id: str) -> Optional[BoefjeMeta]:
+        boefje_metas = sorted(BOEFJE_METAS.values(), key=lambda x: x.ended_at)
+
+        if not boefje_metas:
+            return None
+
+        return BoefjeMeta(**boefje_metas.pop(0).dict())
+
+    def get_last_run_boefje_by_organisation_id(self, organization_id: str) -> Optional[BoefjeMeta]:
+        url = f"{self.host}/bytes/boefje_meta"
+        response = self.get(
+            url=url,
+            params={
+                "organization": organization_id,
+                "limit": 1,
+                "descending": "true",
+            },
+        )
+        if response.status_code == 200 and response.content:
+            return BoefjeMeta(**response.json()[0])
+
+        return None
+
+
+class BytesV1(HTTPService):
     name = "bytes"
 
     def __init__(self, host: str, source: str, user: str, password: str, timeout: int = 5):

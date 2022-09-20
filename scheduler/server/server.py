@@ -2,9 +2,7 @@ import logging
 import queue as _queue
 from typing import Any, Dict, List, Union
 
-import fastapi
 import scheduler
-import uvicorn
 from scheduler import context, models, queues, schedulers
 
 from .pagination import PaginatedResponse, paginate
@@ -18,6 +16,9 @@ class Server:
         ctx: context.AppContext,
         s: Dict[str, schedulers.Scheduler],
     ):
+        import fastapi
+        import uvicorn
+
         self.logger: logging.Logger = logging.getLogger(__name__)
         self.ctx: context.AppContext = ctx
         self.schedulers: Dict[str, schedulers.Scheduler] = s
@@ -187,7 +188,7 @@ class Server:
 
     def list_tasks(
         self,
-        request: fastapi.Request,
+        request,
         scheduler_id: Union[str, None] = None,
         status: Union[str, None] = None,
         offset: int = 0,
