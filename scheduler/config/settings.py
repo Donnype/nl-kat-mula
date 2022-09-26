@@ -27,8 +27,5 @@ class Settings(BaseSettings):
     pq_populate_interval: int = Field(10, env="SCHEDULER_PQ_INTERVAL")
     pq_populate_grace_period: int = Field(86400, env="SCHEDULER_PQ_GRACE")
 
-    # Dispatcher settings
-    dsp_interval: int = Field(5, env="SCHEDULER_DSP_INTERVAL")
-
     # Database settings
     database_dsn: str = Field("sqlite:///", env="SCHEDULER_DB_DSN")
