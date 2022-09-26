@@ -4,7 +4,7 @@ from scheduler.connectors.errors import exception_handler
 from scheduler.models import BoefjeMeta
 
 from .services import HTTPService
-from boefjes.bytes_client import BOEFJE_METAS
+from boefjes.clients.data import BOEFJE_METAS
 
 
 class Bytes:

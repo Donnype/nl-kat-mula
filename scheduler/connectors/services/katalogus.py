@@ -3,7 +3,7 @@ from typing import List
 from scheduler.connectors.errors import exception_handler
 from scheduler.models import Boefje, Organisation, Plugin
 from scheduler.utils import dict_utils
-from katalogus.dependencies.plugins import get_plugin_service
+from boefjes.katalogus.dependencies.plugins import get_plugin_service
 
 
 from .services import HTTPService
