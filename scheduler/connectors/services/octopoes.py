@@ -2,22 +2,13 @@ import random
 from typing import List
 
 from octopoes.connector.octopoes import OctopoesAPIConnector
-from octopoes.models.types import get_relations, OOI_TYPES
-from octopoes.models.ooi.findings import (
-    Finding,
-    FindingType,
-)
+from octopoes.models.types import ALL_TYPES
 
 from scheduler.connectors.errors import exception_handler
-from scheduler.models import OOI, Organisation
+from scheduler.models import OOI, ScanProfile, Organisation
 
 from .services import HTTPService
 
-_EXCLUDED = [Finding] + FindingType.__subclasses__()
-
-OOI_TYPES_WITHOUT_FINDINGS = [
-    name for name, cls_ in OOI_TYPES.items() if cls_ not in _EXCLUDED
-]
 
 class Octopoes:
     name = "octopoes"
@@ -27,8 +18,9 @@ class Octopoes:
         pass
 
     def get_random_objects(self, organisation_id: str, n: int) -> List[OOI]:
-        oois = OctopoesAPIConnector().list(OOI_TYPES_WITHOUT_FINDINGS)
+        oois = OctopoesAPIConnector().list(ALL_TYPES)
 
+        oois = [OOI(primary_key=ooi.reference, scan_profile=ScanProfile(level=ooi.scan_profile.level, reference=ooi.reference)) for ooi in oois]
         if n >= len(oois):
             return oois
 
