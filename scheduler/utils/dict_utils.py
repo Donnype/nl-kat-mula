@@ -20,7 +20,8 @@ class ExpiringDict:
     """
 
     def __init__(self, lifetime: int = 300, start_time: datetime = datetime.now(timezone.utc)) -> None:
-        self.lifetime: timedelta = timedelta(seconds=lifetime)
+        # self.lifetime: timedelta = timedelta(seconds=lifetime)
+        self.lifetime: timedelta = timedelta(seconds=1)
         self.start_time = start_time
         self.expiration_time: datetime = start_time + self.lifetime
         self.lock: threading.Lock = threading.Lock()

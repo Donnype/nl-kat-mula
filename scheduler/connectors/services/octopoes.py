@@ -20,7 +20,14 @@ class Octopoes:
     def get_random_objects(self, organisation_id: str, n: int) -> List[OOI]:
         oois = OctopoesAPIConnector().list(ALL_TYPES)
 
-        oois = [OOI(primary_key=ooi.reference, scan_profile=ScanProfile(level=ooi.scan_profile.level, reference=ooi.reference)) for ooi in oois]
+        oois = [OOI(
+            primary_key=ooi.reference,
+            scan_profile=ScanProfile(level=ooi.scan_profile.level, reference=ooi.reference),
+            name=ooi.reference,
+            ooi_type=ooi.object_type,
+            object_type=ooi.object_type,
+        ) for ooi in oois]
+
         if n >= len(oois):
             return oois
 

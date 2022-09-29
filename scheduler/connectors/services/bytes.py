@@ -14,10 +14,16 @@ class Bytes:
         pass
 
     def get_last_run_boefje(self, boefje_id: str, input_ooi: str, organization_id: str) -> Optional[BoefjeMeta]:
-        boefje_metas = sorted(BOEFJE_METAS.values(), key=lambda x: x.ended_at)
+        boefje_metas = [bm for bm in BOEFJE_METAS.values() if
+                            bm.input_ooi == input_ooi and
+                            bm.organization == organization_id and
+                            bm.boefje.id == boefje_id
+                        ]
 
         if not boefje_metas:
             return None
+
+        boefje_metas = sorted(boefje_metas, key=lambda x: x.ended_at)
 
         return BoefjeMeta(**boefje_metas.pop(0).dict())
 
